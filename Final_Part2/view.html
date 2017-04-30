@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<!-- 
+Allow the user to enter a year to see all data base 
+records that were released in that year or later
+
+Author: Xuesen Tan
+-->
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Movies</title>
+<style>
+tr:nth-child(even) {
+	background-color: #f2f2f2
+}
+
+table, th, td {
+	border: 1px solid black;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+td {
+	padding: 5px;
+}
+</style>
+
+</head>
+<body>
+	<div>Search for an actor, one space may separate first and last name.</div><div> Select the Actor</div>
+	<input type="text" onkeyup = "getActor(this.value)">
+	<hr>
+	<div id="toChange"></div>
+
+	<script>
+		function getMovies(id){
+			var ajax = new XMLHttpRequest();
+			id = id.id;
+			ajax.open("POST", "controller.php?id=" + id, true);
+			ajax.send();
+
+			ajax.onreadystatechange = function() {
+				if (ajax.readyState == 4 && ajax.status == 200) {
+					var array = JSON.parse(ajax.responseText);
+
+					renderData(array);
+				}
+			}
+		}
+		function getActor(actor) {
+			var anObj = new XMLHttpRequest();
+			var divToChange = document.getElementById("toChange");			
+			anObj.open("POST", "controller.php?actor=" + actor, true);
+			anObj.send();
+
+			anObj.onreadystatechange = function() {
+				if (anObj.readyState == 4 && anObj.status == 200) {
+					var array = JSON.parse(anObj.responseText);
+					var str = "";
+					for (i = 0; i < array.length; i++){
+						str += "<div id =" + array[i]['id'] + " onclick = 'getMovies(this)'>" +  i + " : "+ array[i]['first_name']+ " " + array[i]['last_name'] + "</div>";
+					}
+					divToChange.innerHTML = str;
+				}
+			}
+		}
+
+		function renderData(data){
+			var i,j;
+			var newData = '';
+
+			newData = '<table><tr><th>Film</th><th>Role</th></tr>';
+
+			for(i = 0; i <data.length;i++){
+				newData += '<tr><td>' + data[i]['name'] + "</td><td>" + data[i]['role'] + "</td></tr>";
+			}
+			newData+="</table>";
+			document.getElementById("toChange").innerHTML = newData;
+		}
+	</script>
+
+</body>
+</html>
